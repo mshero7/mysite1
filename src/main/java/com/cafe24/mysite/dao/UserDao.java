@@ -9,85 +9,16 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.cafe24.mysite.vo.GuestbookVo;
+import com.cafe24.mysite.vo.UserVo;
 
-public class GuestbookDao {
-	public Boolean delete(GuestbookVo vo) {
-		Boolean result = false;
-		
-		Connection conn = null;
-		PreparedStatement pstmt = null;
-		try {
-			conn = getConnection();
-			
-			String sql =
-				"delete from guestbook where no=? and password=?";
-			pstmt = conn.prepareStatement(sql);
-			
-			pstmt.setLong(1, vo.getNo());
-			pstmt.setString(2, vo.getPassword());
-			
-			int count = pstmt.executeUpdate();
-			result = (count == 1);
-			
-		} catch (SQLException e) {
-			System.out.println("error" + e);
-		} finally {
-			try {
-				if( pstmt != null ) {
-					pstmt.close();
-				}
-				if( conn != null ) {
-					conn.close();
-				}
- 			} catch (SQLException e) {
-				e.printStackTrace();
-			}
-		}		
-		
-		return result;
+public class UserDao {
+	
+	public UserVo get(Long no){
+		return null;
 	}
 	
-	public Boolean insert(GuestbookVo vo) {
-		Boolean result = false;
-		
-		Connection conn = null;
-		PreparedStatement pstmt = null;
-		try {
-			conn = getConnection();
-			
-			String sql =
-				" insert" + 
-				"   into guestbook" + 
-				" values(null, ?, ?, ?, now())";
-			pstmt = conn.prepareStatement(sql);
-			
-			pstmt.setString(1, vo.getName());
-			pstmt.setString(2, vo.getPassword());
-			pstmt.setString(3, vo.getContents());
-			
-			int count = pstmt.executeUpdate();
-			result = (count == 1);
-			
-		} catch (SQLException e) {
-			System.out.println("error" + e);
-		} finally {
-			try {
-				if( pstmt != null ) {
-					pstmt.close();
-				}
-				if( conn != null ) {
-					conn.close();
-				}
- 			} catch (SQLException e) {
-				e.printStackTrace();
-			}
-		}		
-		
-		return result;
-	}	
-	
-	public List<GuestbookVo> getList(){
-		List<GuestbookVo> result = new ArrayList<GuestbookVo>();
+	public UserVo get(String email, String password){
+		UserVo result = null;
 
 		Connection conn = null;
 		PreparedStatement pstmt = null;
@@ -95,23 +26,21 @@ public class GuestbookDao {
 		try {
 			conn = getConnection();
 			
-			String sql = "select no, name, conetnts, date_format(reg_date, '%Y-%m-%d %h:%i:%s') from guestbook order by reg_date desc";
+			String sql = 
+"select no, name from user where email=? and password=?";
 			pstmt = conn.prepareStatement(sql);
 			
+			pstmt.setString(1, email);
+			pstmt.setString(2, password);
+					
 			rs = pstmt.executeQuery();
-			while( rs.next() ) {
+			if( rs.next() ) {
 				Long no = rs.getLong(1);
 				String name = rs.getString(2);
-				String contents = rs.getString(3);
-				String regDate = rs.getString(4);	
 				
-				GuestbookVo vo = new GuestbookVo();
-				vo.setNo(no);
-				vo.setName(name);
-				vo.setContents(contents);
-				vo.setRegDate(regDate);
-				
-				result.add(vo);
+				result = new UserVo();
+				result.setNo(no);
+				result.setName(name);
 			}
 			
 		} catch (SQLException e) {
@@ -133,6 +62,47 @@ public class GuestbookDao {
 		}		
 		return result;
 	}	
+	
+	public Boolean insert(UserVo vo) {
+		Boolean result = false;
+		
+		Connection conn = null;
+		PreparedStatement pstmt = null;
+		try {
+			conn = getConnection();
+			
+			String sql =
+				" insert" + 
+				"   into user" + 
+				" values(null, ?, ?, ?, ?, now())";
+			pstmt = conn.prepareStatement(sql);
+			
+			pstmt.setString(1, vo.getName());
+			pstmt.setString(2, vo.getEmail());
+			pstmt.setString(3, vo.getPassword());
+			pstmt.setString(4, vo.getGender());
+			
+			int count = pstmt.executeUpdate();
+			result = (count == 1);
+			
+		} catch (SQLException e) {
+			System.out.println("error" + e);
+		} finally {
+			try {
+				if( pstmt != null ) {
+					pstmt.close();
+				}
+				if( conn != null ) {
+					conn.close();
+				}
+ 			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+		}		
+		
+		return result;
+	}	
+	
 	
 	private Connection getConnection() throws SQLException {
 		Connection conn = null;
